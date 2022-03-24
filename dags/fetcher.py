@@ -45,6 +45,8 @@ with DAG(
     schedule_interval=timedelta(minutes=10),
     start_date=datetime(2021, 1, 1, 7, 20, 0),
     catchup=False,
+    # Placing the SQLs in a diff directory to better structure the code.
+    template_searchpath=["/opt/airflow/sql"],
     tags=["take-home"],
 ) as dag:
 
@@ -69,7 +71,7 @@ with DAG(
 
     t1 = PostgresOperator(
         task_id="create_table",
-        sql="../sql/current_weather_history_ddl.sql",
+        sql="current_weather_history_ddl.sql",
         postgres_conn_id="weather_db_postgres",
     )
     t2 = PythonOperator(

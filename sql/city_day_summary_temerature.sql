@@ -24,7 +24,7 @@ min(feels_like_temperature) as min_feels_like_temp,
 max(feels_like_temperature) as max_feels_like_temp,
 avg(current_temperature) as avg_temp, 
 avg(feels_like_temperature) as avg_feels_like_temp,
-now() as etl_insert_date
+now() as etl_audit_date
 from temperature_data_cte
 group by city_name, date
 )
@@ -38,9 +38,9 @@ min_feels_like_temp,
 max_feels_like_temp,
 avg_temp,
 avg_feels_like_temp,
-etl_insert_date
+etl_audit_date
 )
-select city_name, date, min_temp, max_temp, min_feels_like_temp, max_feels_like_temp, avg_temp, avg_feels_like_temp, etl_insert_date  
+select city_name, date, min_temp, max_temp, min_feels_like_temp, max_feels_like_temp, avg_temp, avg_feels_like_temp, etl_audit_date  
 from temperature_data_transformed_cte
 where not exists (
 select * from city_day_summary_temerature
@@ -55,5 +55,5 @@ do update set
     max_feels_like_temp = EXCLUDED.max_feels_like_temp,
     avg_temp = EXCLUDED.avg_temp,
     avg_feels_like_temp = EXCLUDED.avg_feels_like_temp,
-    etl_insert_date = EXCLUDED.etl_insert_date;
+    etl_audit_date = EXCLUDED.etl_audit_date;
     

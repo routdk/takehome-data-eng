@@ -22,18 +22,19 @@ with DAG(
     schedule_interval="@daily",
     start_date=datetime(2021, 1, 1),
     catchup=False,
+    template_searchpath=["/opt/airflow/sql"],
     tags=["take-home"],
 ) as dag:
 
     t1 = PostgresOperator(
         task_id="create_agg_table_city_day_summary_temerature",
-        sql="../sql/city_day_summary_temerature_ddl.sql",
+        sql="city_day_summary_temerature_ddl.sql",
         postgres_conn_id="weather_db_postgres",
     )
 
     t2 = PostgresOperator(
         task_id="upsert_agg_table_city_day_summary_temerature",
-        sql="../sql/city_day_summary_temerature.sql",
+        sql="city_day_summary_temerature.sql",
         postgres_conn_id="weather_db_postgres",
     )
     t1 >> t2

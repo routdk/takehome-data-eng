@@ -7,11 +7,11 @@ CREATE TABLE IF NOT EXISTS city_day_summary_temerature  (
     max_feels_like_temp NUMERIC,
     avg_temp NUMERIC,
     avg_feels_like_temp NUMERIC,
-    etl_insert_date TIMESTAMPTZ
+    etl_audit_date TIMESTAMPTZ
 );
 
 ALTER TABLE city_day_summary_temerature
-DROP CONSTRAINT unique_key_city_date;
+DROP CONSTRAINT IF EXISTS unique_key_city_date;
 
 ALTER TABLE city_day_summary_temerature
 ADD CONSTRAINT unique_key_city_date UNIQUE (city_name, date);

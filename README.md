@@ -246,7 +246,34 @@ DBT really shines here. Writing a SQL and insert/update table might seem trivial
 We won’t have lineage if we write individual SQL DML to do data transformation. 
 So the entire system would be a black box.
 
-<Logic TBD>
+I am no expert in weather data and its trend analysis. 
+But for this exercise I will try to create 1 dataset. 
+Let’s focus only on the temperature aspect of weather for now, and the idea can be expanded to other attributes. 
+
+`city_day_summary_temerature`:
+
+gives a summary of daily aggregated temperature
+for a particular city and date. The strategy here is to upsert 
+the record in order to avoid duplicates 
+or full refresh of huge volume of data everyday.
+If we want multiple weather attibute (wind speed, snowflake etc) we can use a 
+window function rather than using group by.
+
+
+Another idea I have is about time series analysis (sepecifically moving average) across
+multiple hours (say 5 hrs moving average, 5 is just a random number). 
+As we capture data entire day in small intervals there will be many data points and moving average will 
+reduce noise and show us a clear pattern on the uptrend or downtrend(mostly cyclic
+in our case as the temp goes up in day time and comes down in evening.
+But moving average is a nice tool across many usecases. There is a standard way 
+of writing SQL on moving average. Though as a part of this take home I did not do it but 
+creating such an aggregated table can be useful.
+Here is the highlevel idea : 
+- Truncate the datetime to hour so that we can get hourly moving avg.
+- If there is a gap in the data we can fill the rows to make it continious (one common way is to generate hourly calender type of dataset and doing a left join with original data).
+- The attributes can be filled with some logic (may be lead/lag or even avg). This will reduce outlier.
+- If we don't want to fill the data RANGE BETWEEN frame in window can be one an alternative. But sometimes it gives incorrect results. Its a bit tricky to use based on the database type.
+- Moving average over specific interval can be found using `ROWS BETWEEN x PRECEDONG and CURRENT ROW`
 
 
 ### Things I wish I could have improved
