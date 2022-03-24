@@ -302,6 +302,14 @@ but setting secrets in a vault and fetching at runtime is a better idea in gener
 - I did not know merge does not exist in Postgres. Postgres's `INSERT ON CONFLICT` syntax was a learning for me.
 
 
+### Time Spent
+
+- Setup and Code Development (3 hrs or so, was not doing continuously)
+- Thought process on architecture and analytics usecase (was doing async while not sitting infront of laptop)
+- Readme (1 hr)
+- I referred documentation/google etc as on when needed for syntax and errors.
+
+
 
 
 
