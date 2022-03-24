@@ -105,3 +105,61 @@ Provide us with some notes about what you would do next if you had more time. Ar
 
 ### Instructions to the evaluator
 Provide any end user documentation you think is necessary and useful here
+
+
+# Proposed Solution
+Let me first present the the 1000ft view on the solution, then I will dig down to individual 
+components on the solution explaning how they are stitched together,
+it's pros and cons and the reason for the design decisions I have taken.
+
+# Philospohy 
+My initial version of the data pipeline is built on my current understanding of the problem statement.
+With time my understanding of the problem would definitely evolve, the and solution would 
+need iterative development cycles to improve.
+
+## The 1,000-Foot View
+
+* STEP1 : Extract the current weather data from the REST API avaialble to us.
+* STEP2 : Parse, clean and re-structure the data elements useful for our business.
+* STEP3 : Store the data where it can be combined with other datasets easily.
+* STEP4 : Create summerized dataset(s) for efficient querying.
+* STEP5 : Automate the process 
+
+### Dataflow Diagram
+
+
+## Tool Selection : 
+* **Data Fetch, Parse and Restructure** : Python
+* **Data Transformation** : SQL 
+* **Data warehouse** : Postgres
+* **Infrastructure** : Docker, Docker Compose
+* **Pipeline Orchrestrator** : Airflow 
+* Local Development : 
+  -  python virtual environment
+  -  Docker Desktop on Mac
+  -  VS Code
+  -  Git
+
+## Environment Setup : 
+
+- Created a virtual environment not to convolute with other local projects.
+```
+python3 -m venv env
+source env/bin/activate
+```
+- Installed libraries : `requests` and `psycopg2-binary`
+- Created requirements.txt `pip freeze > requirements.txt`. Pipenv or Poetry might be a modern and better way of implementing package/dependency management in production scenarios.
+- Leverage .env (dot-env) for all secrets to be exported to the env. Alternative would be a vault to store secrets and fetch when its needed.
+Refer `.env.tmpl` for the details. This can be renamed if someone clones the project and starts working on it.
+- Minor changes to the `docker-compose.yaml` file. 
+  - PYTHONPATH is needed as I created a package to store some utility modules.
+  - Additional environment variables to be exported inside docker.
+- Static lookup file (`lookup_data/usa_coordinates.json)
+This is a JSON file containing all USA cities and their co-ordinates.
+- Dockerfile to build image as I needed additional 3rd party libraries.
+
+
+
+
+
+
