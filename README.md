@@ -108,9 +108,7 @@ Provide any end user documentation you think is necessary and useful here
 
 
 # Proposed Solution
-Let me first present the the 1000ft view on the solution, then I will dig down to individual 
-components on the solution explaning how they are stitched together,
-it's pros and cons and the reason for the design decisions I have taken.
+Let me first present the the 1000ft view on the solution, then I will dig down to individual components on the solution explaning how they are stitched together, it's pros and cons and the reason for the design decisions I have taken.
 
 # Philospohy 
 My initial version of the data pipeline is built on my current understanding of the problem statement.
@@ -126,6 +124,10 @@ need iterative development cycles to improve.
 * STEP5 : Automate the process 
 
 ### Dataflow Diagram
+
+
+![arch](https://user-images.githubusercontent.com/86860323/159840541-8de8a8e0-ef36-4da2-ac72-d80224c1c857.png)
+
 
 
 ## Tool Selection : 
@@ -157,6 +159,66 @@ Refer `.env.tmpl` for the details. This can be renamed if someone clones the pro
 - Static lookup file (`lookup_data/usa_coordinates.json)
 This is a JSON file containing all USA cities and their co-ordinates.
 - Dockerfile to build image as I needed additional 3rd party libraries.
+
+
+
+## Solution Walkthrough
+
+### Data Extraction
+
+
+OpenweatherMap restful API call requires Longitude and Latitude Geo Coordinates. Each call to the API returns one record with a set of weather related attributes for the current timestamp for a particular location(co-ordinates).
+
+
+Geocoder API is a way to get (Longitude, Latitude) of a particular city. But instead of using this I tried to download a master list of geo coordinates and their corresponding city mapping from here and cleaned a bit(collected only USA cities to make the size smaller), and uploaded the data in JSON format to code repo as a static lookup file. Though the code repo is not a suitable place for this (I would prefer a database), to make the assignment simple I have done this. We can consider the scope of our weather data to be all cities in the USA.
+
+
+Now coming to the code part, accessing a REST API is straightforward, using the “request” library in python and “GET” method to a specific endpoint and query params. For a toy example this works well, but in real world the API data extraction has below challenges :
+
+- Rate Limit Throttles the API calls (retry is must) 
+- API call is a sequential process (single threaded application unless we specifically write to code to make it parallel). Multithreading with a list of query params can give us a edge to make the data fetch run in parallel or if we have a distributed engine like spark we can make a data frame of endpoints (adding query params) and hit the API from different worker nodes to make the data fetch parallel.
+- Though this particular API returns 1 record per API call, most API have pagination and we have to loop through the pages to fetch results. Now the question is where to hold the output of the data returned. If we keep the json data in the form of a python dict we may eventually hit a memory limit. So writing the data to somewhere intermittent is essential.For example every 100k rows of 1GB of data we can write to a storage and clean up memory for efficient processing. Again there will be decision decisions on the file format we want to store (row based - AVRO/ORC columnar - PARQUET, simple CSV or JSON)
+
+All these pain points are not addressed in my code. (Only point #1 is addressed). But if I have to develop iteration to the code I would focus on (point # 3) as decoupling extract and transformation steps are very important to address the job failure related issues and software practice in general. My code currently has a very close coupling of EtL(t here is the minor transformation like flattening the json and converting epoch timestamp to a formatted datetime etc). The close coupling of EtL is not a good decision as it involves extract (Network) transform (Compute) and load to DB (I/O) and it's happening in iteration for each record. Say there are 20k cities in the USA and we will repeat the IO 20k times. So point#3 is important for reducing this IO.
+
+### Data Transformation
+
+I have used python to convert JSON to a dict and do the minor transformations (I would like to call it technical transformation) to maintain a clean structure and adhering to the standards. There is no business transformation involved here. We have several options to do the transformation. Dictionary processing is not a very intuitive way to transform data when the volume is large, so frameworks like spark are useful for distributed computing. Even the pattern of loading JSON(semi-structured) data to a database(almost all DB these days have support and functions around it) and parse and do the transformation in the database layer is a commonly used pattern. If it's a well known third party API and we have a budget I would prefer tools like Fivetran, Stitch, Singer (provided there is a connector). This decision is not for this exercise but for parsing JSON results for API and the pain points(schema changes/ additional data elements requirement in future etc.) in general.
+
+Key things that can be improved in my code : 
+
+- Close coupling as I mentioned earlier. The only reason I did close coupling is to avoid data passing between tasks in airflow.
+- Defining schema to the data (as we convert from semi structured to structured). Type casting at this phase is always a better option. 
+
+### Data Loading
+
+I would prefer bulk load features provided by the databases as opposed to dynamically generating and running insert statements for each row. Example : COPY command offered by Redshift and Snowflake.
+
+This is the area where I spent most of my time. I learned that generating the INSERT statements with a formatted string approach does not work in Postgres. There might be some trick to make it work, but I had no luck. So I googled around and found an alternative solution to build the SQL statement. 
+
+2 key design decisions here
+- Building History (how do we get it or will we build over time)
+- Frequency of data ingestion (what are the end use cases)
+
+### Derived Tables/ Aggregated Tables/ Summary Tables (Real Capital T of ELtT) 
+
+This is the layer that gives the real business value. We need a robust data model and key relationships, insert/update strategy properly defined. Though in this particular assignment we are not building a data model (dimensional modeling is mostly used followed by Data Vault 2.0 in the modern data world). Also there is a recent trend of OBT (One Big Table) holding everything to make the life of analysts easier. Probably the data model I created in this exercise falls under OBT category.
+
+DBT really shines here. Writing a SQL and insert/update table might seem trivial but at scale maintaining those is challenging. We won’t have lineage if we write individual SQL DML to do data transformation. So the entire system would be a black box.
+
+
+### Things to Consider : 
+
+- Testing Testing Testing (It’s important so written 3 times) - Code Unit Testing and Data Testing. I personally see more value in data testing as opposed to code testing because the code will run with fix set of parameters and no user is running the code as such. So in user facing application development unit and system testing is more critical but in data processing application development data testing(integrity/key relationships, null/dup check etc are more imp)
+- Decouple the EtL piece and make Et and L separate.
+- I have used .env(dot env) locally to store secrets and docker compose exports them to the environment(I did not know docker-compose has native support for it), but setting secrets in a vault and fetching at runtime is a better idea in general than storing as env variables. 
+
+### Challenges : 
+
+- I tried to use poetry for dependency management. Building a docker container installing poetry and generating the requirements.txt file did not work. So I generated the requirements.txt from my virtual environment and placed it.
+- Spent a relatively long time debugging the issues of running inside docker as PYTHONPATH was not set and the packages and modules I created were not getting recognized. 
+
+
 
 
 
