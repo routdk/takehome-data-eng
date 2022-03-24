@@ -42,8 +42,8 @@ with DAG(
     "fetcher",
     default_args=default_args,
     description="To fetch the weather data",
-    schedule_interval=timedelta(minutes=60),
-    start_date=datetime(2021, 1, 1),
+    schedule_interval=timedelta(minutes=10),
+    start_date=datetime(2021, 1, 1, 7, 20, 0),
     catchup=False,
     tags=["take-home"],
 ) as dag:
@@ -69,7 +69,7 @@ with DAG(
 
     t1 = PostgresOperator(
         task_id="create_table",
-        sql="sql/current_weather_history_ddl.sql",
+        sql="../sql/current_weather_history_ddl.sql",
         postgres_conn_id="weather_db_postgres",
     )
     t2 = PythonOperator(

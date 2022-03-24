@@ -262,6 +262,7 @@ but setting secrets in a vault and fetching at runtime is a better idea in gener
 - Using Pipenv or Poetry for virtual environment setting.
 - Wanted to try other APIs like forecast. Bulk unload API(I guess free account does not have access there)
 - A better data model. 
+- Clear thinking on error and rejection handling scenarios and re-run edge cases.
 
 
 ### Challenges I faced: 
@@ -270,7 +271,9 @@ but setting secrets in a vault and fetching at runtime is a better idea in gener
 - Spent a relatively long time(30 ish min) debugging the issues of running DAG inside docker as PYTHONPATH was not set and the packages and modules I created were not getting recognized.
 - I tried to use parameter in SQL query(table name) to run postgres operator, but it was adding a single quote around the table name and there was syntax error.
 - Imagining a proper meaningful analytics usecase for the data. I could think of just moving averages using Windows functions. 
-- API call is really slow. 60 calls per minute means 60 records per minute  
+- API call is really slow. 60 calls per minute means 60 records per minute. We have to limit our scope(# of cities) or increase the interval of data fetch.
+- I did not know merge does not exist in Postgres. Postgres's `INSERT ON CONFLICT` syntax was a learning for me.
+
 
 
 

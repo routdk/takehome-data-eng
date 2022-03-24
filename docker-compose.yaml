@@ -88,6 +88,9 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
+    #Added port mapping so that I can open local client DBever and connect to DB and query
+    ports:
+      - "6543:5432"
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
