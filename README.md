@@ -252,12 +252,13 @@ Let’s focus only on the temperature aspect of weather for now, and the idea ca
 
 `city_day_summary_temerature`:
 
-gives a summary of daily aggregated temperature
-for a particular city and date. The strategy here is to upsert 
-the record in order to avoid duplicates 
-or full refresh of huge volume of data everyday.
-If we want multiple weather attibute (wind speed, snowflake etc) we can use a 
-window function rather than using group by.
+gives a summary of daily aggregated temperature for a particular city and date. The strategy here is to upsert the record in order to avoid duplicates 
+or full refresh of huge volume of data everyday. If we want multiple weather attibute (wind speed, snowflake etc) we can use a  window function rather than using group by.
+
+Reduced the scope further to 5 USA cities and aggregation for 1 day.
+
+![Screen Shot 2022-03-24 at 1 10 11 PM](https://user-images.githubusercontent.com/86860323/159972398-99c937ab-02b9-4149-9725-ed7e67d61a28.png)
+
 
 
 Another idea I have is about time series analysis (sepecifically moving average) across
@@ -290,6 +291,7 @@ but setting secrets in a vault and fetching at runtime is a better idea in gener
 - Wanted to try other APIs like forecast. Bulk unload API(I guess free account does not have access there)
 - A better data model. 
 - Clear thinking on error and rejection handling scenarios and re-run edge cases.
+- Good Analytics usecase and create a dataset which could have given lots of insights.
 
 
 ### Challenges I faced: 
