@@ -166,7 +166,7 @@ Refer `.env.tmpl` for the details. This can be renamed to `.env` if someone clon
 - Minor changes to the `docker-compose.yaml` file. 
   - PYTHONPATH is needed as I created a package to store some utility modules.
   - Additional environment variables to be exported inside docker.
-- Static lookup file (`lookup_data/usa_coordinates.json)
+- Static lookup file (`lookup_data/usa_coordinates.json`)
 This is a JSON file containing all USA cities and their co-ordinates.
 - Dockerfile to build image as I needed additional 3rd party libraries.
 
@@ -199,7 +199,7 @@ So writing the data to somewhere in the interim is essential.
 For example every 100k rows or 1GB of data we can write to a storage and clean up memory for efficient processing. 
 Again there will be decision decisions on the file format we want to store (row based - AVRO/ORC, columnar - PARQUET, simple CSV or JSON)
 
-All these pain points are not addressed in my code. (Only point #1 is addressed). 
+All these pain points are not addressed in my code. (Only point # 1 is addressed). 
 But if I have to develop iteration to the code I would focus on (point # 3) as decoupling extract and transformation steps are very important to address the job failure/re-run related issues and software practice in general. 
 My code currently has a very close coupling of EtL(t here is the minor transformation like flattening the json and converting epoch timestamp to a formatted datetime etc). 
 The close coupling of EtL is not a good decision as it involves extract (Network) transform (Compute) and load to DB (I/O) and it's happening in iteration for each record. 
